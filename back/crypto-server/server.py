@@ -1,80 +1,76 @@
-import tornado.ioloop
-import tornado.web
-
-class MainHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write("Hello, world")
-
-def make_app():
-    return tornado.web.Application([
-        (r"/", MainHandler),
-    ])
-
-if __name__ == "__main__":
-    app = make_app()
-    app.listen(8888)
-    tornado.ioloop.IOLoop.current().start()
+import time
+import threading
+import logging
+from queue import Queue
 
 
+class twitterThread (threading.Thread):
+   def __init__(self, threadID, q):
+      threading.Thread.__init__(self)
+      self.threadID = threadID
+      self.q = q
+   def run(self):
+      # import twitter
+      counter = 0
+      while(True):
+        counter += 1
+        self.q.put("Item " + str(counter))
+        time.sleep(1)
+
+
+class clientThread (threading.Thread):
+    def __init__(self, threadID, q):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.q = q
+    def run(self):
+        while(True):
+            print(self.q.get())
+            time.sleep(3)
+        # from websocket_server import WebsocketServer
+        # server = WebsocketServer(8888, host='http://localhost')
+        # server.set_fn_new_client(new_client)
+        # server.run_forever()
+
+q = Queue()
+thread1 = twitterThread(1, q)
+thread2 = clientThread(2, q)
+thread1.start()
+thread2.start()
 
 
 
 
 
 
+# ----------------------------------------------------------------------------------------------------------------------
 
+# class clientThread (threading.Thread):
+#   def __init__(self, threadID):
+#       threading.Thread.__init__(self)
+#       self.threadID = threadID
+#   def run(self):
+#       import asyncio
+#       import websockets
+#       from pyee import EventEmitter
+#       ee = EventEmitter()
+#       @ee.on('sentiment-update')
+#       async def onMessage(msg):
+#           print("Received message")
+#           websocket.send(msg)
 
+#       async def hello(websocket, path):
+#           name = await websocket.recv()
+#           print("Received Message")
 
+#           greeting = ("Hello World")
+#           await websocket.send(greeting)
+#           print("Sent message")
 
+#       start_server = websockets.serve(hello, 'localhost', 8888)
 
-
-
-
-
-
-
-
-
-
-
-
-# -----------------------------------------------------------------------
-
-
-# import asyncio
-# from websocket_server import WebsocketServer
-
-# PORT=9002
-# server = WebsocketServer(PORT)
-
-# # Called for every client connecting (after handshake)
-# @asyncio.coroutine
-# def new_client(client, server):
-# 	print("New client connected and was given id %d" % client['id'])
-# 	server.send_message_to_all("Hey all, a new client has joined us")
-
-# # Called for every client disconnecting
-# @asyncio.coroutine
-# def client_left(client, server):
-# 	print("Client(%d) disconnected" % client['id'])
-
-# # Called when a client sends a message
-# @asyncio.coroutine
-# def message_received(client, server, message):
-# 	if len(message) > 200:
-# 		message = message[:200]+'..'
-# 	print("Client(%d) said: %s" % (client['id'], message))
-
-# # Send message to client
-# @asyncio.coroutine
-# def send_message_to_client(msg):
-# 	server.send_message_to_all("NEW MESSAGE")
-
-# @asyncio.coroutine
-# def start_server(): 
-# 	server.set_fn_new_client(new_client)
-# 	server.set_fn_client_left(client_left)
-# 	server.set_fn_message_received(message_received)
-# 	server.run_forever()
-
-# start_server()
+#       asyncio.get_event_loop().run_until_complete(start_server)
+#       while(True):
+#           asyncio.get_event_loop()
+#           ee.emit("sentiment-update")
+#           time.sleep(1)   

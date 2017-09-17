@@ -3,9 +3,11 @@ from tweepy import OAuthHandler, Stream
 from tweepy.streaming import StreamListener
 import json
 import sentiment
-import server
 
-print("ASYNC")
+from pyee import EventEmitter
+
+ee = EventEmitter()
+
 consumer_key='0Apql2NUD1DkbpqNSRwIh4Ory'
 consumer_secret='zjSGgToPMbqT3AX9UXayQYAi0i4WyBQ4QMqY6130Ivz6yjt6Bh'
 access_token_key='219067513-3jMVUEKlibTCdNkuoZ3YiaOItf6kIS4ybzYAg73i'
@@ -20,7 +22,7 @@ class MyListener(StreamListener):
     def on_data(self, data):
     	tweet = json.loads(data)
     	sentimentData = sentiment.analyzeSentiment(tweet.get('text'), tweet['user']['followers_count'], tweet.get('created_at'))
-    	server.send_message_to_client(sentimentData)
+    	ee.emit('sentiment-update', sentimentData)
     def on_error(self, status):
         print(status)
         return True

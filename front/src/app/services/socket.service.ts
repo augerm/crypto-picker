@@ -8,7 +8,7 @@ export class SocketService {
 	private subject = new Subject<any>();
 
 	constructor() {
-		this.sentimentSocket = new WebSocket("ws://localhost:8080");
+		this.sentimentSocket = new WebSocket("ws://localhost:8888");
 		this.sentimentSocket.onopen = (event) => {
 			this.sentimentSocket.send("Here's some text that the server is urgently awaiting!"); 
 			this.sentimentSocket.onmessage = (msg) => {
