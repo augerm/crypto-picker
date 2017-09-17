@@ -1,1 +1,1 @@
-"# crypto-picker" 
+# Crypto Picker
