@@ -1,1 +1,1 @@
-# Crypto Picker
+# Cryptocurrency Sentiment Analyzer
