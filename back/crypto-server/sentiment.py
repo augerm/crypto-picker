@@ -28,7 +28,9 @@ def analyzeSentiment(tweet, numFollowers, timeStamp):
     vs = analyzer.polarity_scores(tweet)
     msTime = dateutil.parser.parse(timeStamp).timestamp() * 1000
     sentiments.append({"compound": vs['compound'], "timeStamp": msTime})
-    updateCurrentSentiment()
+    # Update the current sentiment & return the latest sentiment average
+    return updateCurrentSentiment()
+
     # print("timeStamp:", timeStamp)
     # print("tweet:", tweet)
     # print("numFollowers:", numFollowers)
@@ -49,11 +51,15 @@ def updateCurrentSentiment():
 			sentimentValues.append(sentiment.get('compound')/10)
 			sentimentTimes.append((sentiment.get('timeStamp')-CUR_TIME_MS)/1000000 )
 	if(len(sentimentValues) > 1):
-		currentSentiment.append(s.mean(sentimentValues))
+		averageSentiment = s.mean(sentimentValues)
+		currentSentiment.append(averageSentiment)
 		currentTime.append(sentimentTimes[-1])
-		print("sentimentValues:", sentimentValues)
-		print("Current sentiment: ", currentTime)
+		return averageSentiment
+		# print("sentimentValues:", sentimentValues)
+		# print("Current sentiment: ", currentTime)
 		# graph.updateGraph(currentTime, currentSentiment)
+	else:
+		return None
 
 def getCurrentSentiment():
 	return currentSentiment

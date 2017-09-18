@@ -3,6 +3,8 @@ import threading
 import logging
 from queue import Queue
 
+from twitter import Twitter
+from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
 class twitterThread (threading.Thread):
    def __init__(self, threadID, q):
@@ -10,35 +12,38 @@ class twitterThread (threading.Thread):
       self.threadID = threadID
       self.q = q
    def run(self):
-      # import twitter
-      counter = 0
-      while(True):
-        counter += 1
-        self.q.put("Item " + str(counter))
-        time.sleep(1)
+      twitter = Twitter(self.q)
 
 
-class clientThread (threading.Thread):
-    def __init__(self, threadID, q):
-        threading.Thread.__init__(self)
-        self.threadID = threadID
+clients = []
+class SimpleSocket(WebSocket):
+    def __init__(self, q):
         self.q = q
-    def run(self):
         while(True):
-            print(self.q.get())
-            time.sleep(3)
-        # from websocket_server import WebsocketServer
-        # server = WebsocketServer(8888, host='http://localhost')
-        # server.set_fn_new_client(new_client)
-        # server.run_forever()
+            try: 
+                for items in range(0, self.q.qsize()):
+                    item = self.q.get_nowait()
+                    print(item)
+                    for client in clients:
+                        client.sendMessage(item)
+                time.sleep(3)
+            except Queue.Empty:
+                pass
+
+    def handleConnected(self):
+       print("Client joined")
+       clients.append(self)
+
+    def handleClose(self):
+       print("Client Left")
+       clients.remove(self)
 
 q = Queue()
 thread1 = twitterThread(1, q)
-thread2 = clientThread(2, q)
 thread1.start()
-thread2.start()
 
-
+server = SimpleWebSocketServer('', 8888, SimpleSocket(q))
+server.serveforever()
 
 
 
